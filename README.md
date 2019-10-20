@@ -136,3 +136,21 @@ print(np.concatenate([sample_array3,sample_array4],axis=0))
 # vstackで列方向の結合が可能
 print(np.vstack((sample_array3,sample_array4)))
 ```
+
+## ブロードキャスト
+
+ブロードキャストは、配列の大きさが異なっていれば、自動的に要素をコピーし大きさを揃えるNumPyの機能です。
+
+```python
+import numpy as np
+# データの準備
+sample_array = np.arange(10)
+print(sample_array)
+
+# 上記の配列に「5」を足す計算
+# 要素をコピーして大きさを揃えて、配列の全ての要素に5を加算
+print(sample_array + 5)
+```
+
+![ブロードキャストの説明図](https://camo.qiitausercontent.com/bd16245d17b1cbfaa7a9f267de2d8dae8ef39cec/68747470733a2f2f71696974612d696d6167652d73746f72652e73332e616d617a6f6e6177732e636f6d2f302f3137313731352f65393664663264642d353937342d353662312d313239652d3236373162383062343535642e706e67)
+
