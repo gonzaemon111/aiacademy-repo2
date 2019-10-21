@@ -110,3 +110,139 @@ df.columns = ["Name", "Position", "height"]
 print(df)
 ```
 
+## 条件による行の抽出(query)
+
+`query`を利用することで`pandas.DataFrame`の列の値に対し、条件に応じて行を抽出することが可能です。
+比較演算子を利用した複数の条件指定が出来ます。
+
+```python
+import pandas as pd
+df = pd.DataFrame([[10, 20,30, 30], [25, 50,65, 80]], index=["1行", "2行"], columns=["A", "B", "C", "D"])
+print(df)
+#       A   B   C   D
+# 1行  10  20  30  30
+# 2行  25  50  65  80
+
+print(df.query('A >= 5 and C <= 50'))
+
+#      A   B   C   D
+# 1行  10  20  30  30
+```
+上記プログラムは、A列が5以上かつ、C列が50より小さい値が含まれている行を抽出するプログラムです。
+
+## データの入出力
+
+Pandasはデータをファイルから入力及び解析後のデータをファイルを出力する機能があります。
+Pandasでは大きく4つの入出力が可能です。
+
+1. テキスト形式のデータファイルからデータの読み込み
+2. バイナリ形式のデータファイルからデータの読み込み
+3. データベースからのデータの読み込み
+4. Web上からのデータの読み込み
+
+例えば、Pandasでcsvファイルを読み込む場合は、「read_csv」を使い、データの出力には「to_csv」や「to_excel」などが利用可能です。csv以外にも、「read_json」や「read_excel」、「read_json」「read_sql」もあり、それらの出力メソッドもあります。
+TSVファイルの場合は、「read_table」を使うことで区切り文字がタブ\tのファイルを処理することが出来ます。
+試しにcsvファイルを読み込んでみましょう。
+
+## Pandasソート
+
+**インデックス (行名・列名)を使う方法と値に基づいてソートする方法があります。**
+`.sort_index()`を使うことで、インデックス（カラム名、行名）に基づいてソートを行うことができます。
+そのまま使うと、昇順（小さい順）でのソートとなりますが、引数に、`ascending=False`を記述することで降順(大きい順)のソートができます。
+`.sort_values(by=カラムのリスト)`を使うことで、列の値の小さい順にソートすることができます。
+
+```python
+import pandas as pd
+import numpy as np
+df = pd.DataFrame(np.random.randn(20,2))
+df.sort_index(ascending=False) # 降順
+
+# 昇順でソートするには上記の降順ソートのコードをコメントアウトして下記を実行してください
+df.sort_values(by=1) # key(カラム名)が1の昇順(小さい順)でソート
+df.sort_values(by=1, ascending=False)  # keyが1の降順(大きい順)でソート
+```
+上記を実行すると次のように出力されます。
+（random.randn()を用いているため、実行ごとによって出力が変わります。）
+
+## 欠損値の処理
+
+Pandasには欠損値(NaN)の扱うメソッドは「`dropna`」、「`fillna`」、「`isnull`」、「`notnull`」があります。
+1つ1つ解説していきます。
+まず**dropnaは指定の軸方向にデータ列を見て、欠損値(NaN)の有無に関して指定の条件を満たす場合に、そのデータ列を削除します。**
+fillnaは欠損値を指定の値もしくは、指定の方法で埋めることができます。
+isnullはデータの要素ごとにNaNはTrue、それ以外をFalseとして扱い、元のデータと同じサイズのオブジェクトを返します。
+notnullはisnullとは逆の真偽値を返します。
+
+```python
+import numpy as np
+import pandas as pd
+df = pd.DataFrame({"int": [1, np.nan, np.nan, 32],
+                   "str": ["python", "ai", np.nan, np.nan],
+                   "flt": [5.5, 4.2, -1.2, np.nan]})
+print(df)
+
+# df成分に対してNaNの地位をTrueとしたブールの値のデータフレームを返す
+print(df.isnull()) # notnull()を使うと、TrueとFalseが逆の処理になる。
+
+# "int"列にNaNがある行の削除
+print(df.dropna(subset=["int"]))
+
+# NaNがある行を全て削除する
+print(df.dropna())
+
+# NaNを全て0に置換する
+print(df.fillna(0)) # 第一引数にmethod="ffill" 第二引数にlimtit=数字 とすることで指定した数字までは前のデータを使ってNaNを埋めることができます
+
+df2 = pd.DataFrame({"int": [1, np.nan, np.nan, 32],
+                   "str": ["python", "ai", np.nan, np.nan],
+                   "flt": [5.5, 4.2, -1.2, np.nan]})
+
+# int列だけ0で補完
+df2.fillna({"int": 0}) # 特定の列に対しては辞書型を用いる
+
+
+# 列ごとに異なる値を使いたい時は複数のキーを渡す。
+df2.fillna({"int": 0, "str": "ai"}) 
+
+# 特定の列(例えばflt)を削除
+df2.drop(labels="flt",axis=1)
+"""
+  int str
+0 1.0 python
+1 NaN ai
+2 NaN NaN
+3 32.0  NaN
+"""
+
+# 複数の列を削除
+df2.drop(labels=["flt", "str"],axis=1)
+
+"""
+  int
+0 1.0
+1 NaN
+2 NaN
+3 32.0
+"""
+
+# indexを指定すると行を消すこともできます
+df2.drop(index=1, axis=0)
+"""
+int str flt
+0 1.0 python  5.5
+2 NaN NaN -1.2
+3 32.0  NaN NaN
+"""
+
+# 元のデータに反映して削除するにはinplaceオプションにTrueを渡します
+df2.drop(labels="flt", axis=1, inplace=True)
+print(df2)
+
+"""
+int str
+0 1.0 python
+1 NaN ai
+2 NaN NaN
+3 32.0  NaN
+"""
+```
